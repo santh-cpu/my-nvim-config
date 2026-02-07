@@ -1,11 +1,9 @@
 return {
-
   -- Mason
   {
     "williamboman/mason.nvim",
     config = true,
   },
-
   -- Mason LSP bridge
   {
     "williamboman/mason-lspconfig.nvim",
@@ -17,22 +15,20 @@ return {
         "ts_ls",
         "jdtls",
         "clangd",
+        "gopls",
       },
     },
   },
-
   -- Native LSP
   {
     "neovim/nvim-lspconfig",
     config = function()
-
       -- UI polish
       vim.lsp.handlers["textDocument/hover"] =
         vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
 
       vim.lsp.handlers["textDocument/signatureHelp"] =
         vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
-
       -- On attach keymaps
       local on_attach = function(_, bufnr)
         local k = vim.keymap.set
@@ -63,6 +59,18 @@ return {
         ts_ls = {},
         jdtls = {},
         clangd = {},
+        gopls = {
+          settings = {
+            gopls = {
+              gofumpt = true,
+              analyses = {
+                unusedparams = true,
+                shadow = true,
+              },
+              staticcheck = true,
+            },
+          },
+        },
       }
 
       for name, opts in pairs(servers) do
@@ -74,4 +82,3 @@ return {
     end
   }
 }
-

@@ -24,4 +24,3 @@ keymap("n", "H", "^")
 keymap("n", "L", "$")
 keymap("n", "<leader>gg", "gg")
 keymap("n", "<leader>G", "G")
-

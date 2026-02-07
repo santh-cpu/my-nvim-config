@@ -9,6 +9,7 @@ return {
       c = { "clang_format" },
       cpp = { "clang_format" },
       java = { "google_java_format" },
+      go = { "goimports" },
     },
 
     format_on_save = {
@@ -25,4 +26,3 @@ return {
     end, { desc = "Format file" })
   end,
 }
-

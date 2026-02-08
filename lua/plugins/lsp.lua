@@ -22,19 +22,24 @@ return {
   {
     "neovim/nvim-lspconfig",
     config = function()
-      -- go-only diagnostic filter
-      local orig = vim.lsp.handlers["textDocument/publishDiagnostics"]
-      vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
-        if ctx and ctx.bufnr then
-          local ft = vim.bo[ctx.bufnr].filetype
-          if ft == "go" and result and result.diagnostics then
-            result.diagnostics = vim.tbl_filter(function(d)
-              return d.code ~= "ST1003" and d.code ~= "ST1005"
-            end, result.diagnostics)
+      local go_diags_enabled = false
+
+      local function set_go_diags(bufnr, enabled)
+        vim.diagnostic.enable(enabled, { bufnr = bufnr })
+      end
+
+      vim.api.nvim_create_user_command("GoDiagToggle", function()
+        go_diags_enabled = not go_diags_enabled
+        for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+          if vim.bo[bufnr].filetype == "go" then
+            set_go_diags(bufnr, go_diags_enabled)
           end
         end
-        return orig(err, result, ctx, config)
-      end
+        vim.notify(
+          "go diagnostics " .. (go_diags_enabled and "enabled" or "disabled"),
+          vim.log.levels.INFO
+        )
+      end, {})
 
       vim.lsp.handlers["textDocument/hover"] =
         vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
@@ -43,6 +48,10 @@ return {
         vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
 
       local on_attach = function(_, bufnr)
+        if vim.bo[bufnr].filetype == "go" then
+          set_go_diags(bufnr, go_diags_enabled)
+        end
+
         local k = vim.keymap.set
         local o = { buffer = bufnr }
 
@@ -62,6 +71,9 @@ return {
         k("n", "<leader>f", function()
           vim.lsp.buf.format({ async = true })
         end, o)
+
+        -- optional keybind for toggle
+        k("n", "<leader>gd", "<cmd>GoDiagToggle<cr>", o)
       end
 
       local servers = {
@@ -74,10 +86,6 @@ return {
           settings = {
             gopls = {
               gofumpt = true,
-              analyses = {
-                unusedparams = true,
-                shadow = true,
-              },
               staticcheck = true,
             },
           },

@@ -8,12 +8,14 @@ return {
       rust = { "rustfmt" },
       c = { "clang_format" },
       cpp = { "clang_format" },
+      objc = { "clang_format" },
+      objcpp = { "clang_format" },
       java = { "google_java_format" },
       go = { "goimports" },
     },
 
     format_on_save = {
-      timeout_ms = 500,
+      timeout_ms = 2000, 
       lsp_fallback = true,
     },
   },
@@ -22,7 +24,7 @@ return {
     require("conform").setup(opts)
 
     vim.keymap.set("n", "<leader>F", function()
-      require("conform").format()
+      require("conform").format({ timeout_ms = 2000, lsp_fallback = true })
     end, { desc = "Format file" })
   end,
 }
